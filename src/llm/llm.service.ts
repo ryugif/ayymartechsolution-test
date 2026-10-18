@@ -22,6 +22,14 @@ export class LlmService {
     this.model = config.getOrThrow<string>('GEMINI_MODEL');
   }
 
+  /**
+   * Generate a response from the LLM given a system prompt and conversation history.
+   * @param system - The system prompt to guide the LLM's behavior.
+   * @param turns - The conversation history, including user and model turns.
+   * @returns The generated response text from the LLM.
+   * @throws LlmUnavailableException if the LLM service is unavailable.
+   * @throws LlmResponseBlockedException if the LLM response is blocked due to content filtering.
+   */
   async generate(system: string, turns: LlmTurn[]): Promise<string> {
     const started = Date.now();
     let text: string | undefined;
@@ -49,6 +57,15 @@ export class LlmService {
     return text;
   }
 
+  /**
+   * Stream a response from the LLM given a system prompt and conversation history.
+   * @param system - The system prompt to guide the LLM's behavior.
+   * @param turns - The conversation history, including user and model turns.
+   * @param signal - An optional AbortSignal to cancel the streaming request.
+   * @returns An async generator that yields chunks of text from the LLM response.
+   * @throws LlmUnavailableException if the LLM service is unavailable.
+   * @throws LlmResponseBlockedException if the LLM response is blocked due to content filtering.
+   */
   async *stream(
     system: string,
     turns: LlmTurn[],
