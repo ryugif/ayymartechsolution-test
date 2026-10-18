@@ -30,7 +30,11 @@ export class AuthController {
       path: '/',
       maxAge: Number(this.config.get('JWT_EXPIRES_IN_SECONDS')),
     });
-    return user;
+    return {
+      user,
+      accessToken: token,
+      expiresIn: Number(this.config.get('JWT_EXPIRES_IN_SECONDS')),
+    };
   }
 
   @Post('logout')
