@@ -5,6 +5,7 @@ import { LlmService, LlmTurn } from '../llm/llm.service';
 import { SUMMARY_REQUEST, buildSystemPrompt } from '../llm/promts';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProjectsService } from '../projects/projects.service';
+import { ChatEvent } from '../types/chat';
 
 @Injectable()
 export class ChatService {
@@ -101,5 +102,90 @@ export class ChatService {
       role: m.role === 'USER' ? 'user' : 'model',
       text: m.content,
     }));
+  }
+
+  private async saveExchange(
+    projectId: string,
+    content: string,
+    reply: string,
+  ) {
+    const t = Date.now();
+    const [userMessage, assistantMessage] = await this.prisma.$transaction([
+      this.prisma.message.create({
+        data: {
+          projectId,
+          role: 'USER',
+          type: 'CHAT',
+          content,
+          createdAt: new Date(t),
+        },
+      }),
+      this.prisma.message.create({
+        data: {
+          projectId,
+          role: 'ASSISTANT',
+          type: 'CHAT',
+          content: reply,
+          createdAt: new Date(t + 1),
+        },
+      }),
+      this.prisma.project.update({
+        where: { id: projectId },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+    return { userMessage, assistantMessage };
+  }
+
+  async *streamReply(
+    userId: string,
+    projectId: string,
+    content: string,
+    signal: AbortSignal,
+  ): AsyncGenerator<ChatEvent> {
+    const project = await this.projects.getOwned(userId, projectId);
+    const history = await this.loadHistory(projectId);
+
+    let reply = '';
+    for await (const text of this.llm.stream(
+      buildSystemPrompt(project),
+      [...history, { role: 'user', text: content }],
+      signal,
+    )) {
+      reply += text;
+      yield { event: 'token', data: { text } };
+    }
+    if (signal.aborted) return; // stopped by client, save nothing
+
+    yield {
+      event: 'done',
+      data: await this.saveExchange(projectId, content, reply),
+    };
+  }
+
+  async *streamSummary(
+    userId: string,
+    projectId: string,
+    signal: AbortSignal,
+  ): AsyncGenerator<ChatEvent> {
+    const project = await this.projects.getOwned(userId, projectId);
+    const history = await this.loadHistory(projectId);
+    if (history.length === 0) throw new ConversationEmptyException();
+
+    let text = '';
+    for await (const chunk of this.llm.stream(
+      buildSystemPrompt(project),
+      [...history, { role: 'user', text: SUMMARY_REQUEST }],
+      signal,
+    )) {
+      text += chunk;
+      yield { event: 'token', data: { text: chunk } };
+    }
+    if (signal.aborted) return;
+
+    const message = await this.prisma.message.create({
+      data: { projectId, role: 'ASSISTANT', type: 'SUMMARY', content: text },
+    });
+    yield { event: 'done', data: { message } };
   }
 }
