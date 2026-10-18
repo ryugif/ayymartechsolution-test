@@ -34,4 +34,25 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
+  {
+    files: ['src/**/*.ts'],
+    ignores: ['src/exceptions/**', 'prisma/**'],
+    rules: {
+      'no-restricted-syntax': ['error', {
+        selector: "ThrowStatement > NewExpression[callee.name='Error']",
+        message: 'Throw an exception from exceptions instead of Error.',
+      }],
+      'no-restricted-imports': ['error', {
+        paths: [{
+          name: '@nestjs/common',
+          importNames: [
+            'HttpException', 'BadRequestException', 'UnauthorizedException', 'ForbiddenException',
+            'NotFoundException', 'ConflictException', 'InternalServerErrorException',
+            'BadGatewayException', 'UnprocessableEntityException', 'ServiceUnavailableException',
+          ],
+          message: 'Use exceptions from exceptions.',
+        }],
+      }],
+    },
+  },
 );
