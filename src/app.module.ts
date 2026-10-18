@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
 import { ProjectsModule } from './projects/projects.module';
+import { LlmModule } from './llm/llm.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { ProjectsModule } from './projects/projects.module';
     ConfigModule.forRoot({ isGlobal: true }),
     CommonModule,
     ProjectsModule,
+    LlmModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
