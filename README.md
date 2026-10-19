@@ -36,6 +36,9 @@ Copy the example environment file to `.env`:
 cp .env.example .env
 ```
 
+Important: The backend requires a Gemini API key for AI-powered features. Visit [Google AI Studio](https://aistudio.google.com/apikey) to get the API Key.
+Please keep your API key private. Do not commit your .env file to version control.
+
 ### 3. Set up the database
 
 Ensure PostgreSQL is running and the database exists.
