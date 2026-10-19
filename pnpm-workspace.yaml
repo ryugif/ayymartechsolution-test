@@ -1,3 +1,9 @@
+packages:
+  - '.'
+
+overrides:
+  fastify: '5.11.3'
+
 allowBuilds:
   '@google/genai': true
   '@parcel/watcher': true
@@ -7,5 +13,3 @@ allowBuilds:
   prisma: true
   protobufjs: true
   unrs-resolver: true
-overrides:
-  fastify: 5.11.3
