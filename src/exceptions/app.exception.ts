@@ -67,3 +67,13 @@ export class LlmResponseBlockedException extends AppException {
     );
   }
 }
+
+export class ConversationEmptyException extends AppException {
+  constructor() {
+    super(
+      ErrorCode.CONVERSATION_EMPTY,
+      'Nothing to summarise yet, chat first',
+      HttpStatus.CONFLICT,
+    );
+  }
+}

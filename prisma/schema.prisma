@@ -38,10 +38,11 @@ model Project {
   description String?   @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  archivedAt  DateTime?
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages    Message[]
 
-  @@index([userId, updatedAt])
+  @@index([userId, updatedAt, archivedAt])
 }
 
 model Message {

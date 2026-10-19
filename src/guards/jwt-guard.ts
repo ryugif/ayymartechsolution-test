@@ -9,6 +9,7 @@ import {
 } from '../exceptions/app.exception';
 
 type RequestWithAuth = {
+  headers: { authorization?: string };
   cookies?: Record<string, string | undefined>;
   user?: AuthUser;
 };
@@ -20,6 +21,12 @@ export class JwtAuthGuard implements CanActivate {
     private reflector: Reflector,
   ) {}
 
+  private extractToken(req: RequestWithAuth): string | undefined {
+    const [type, token] = req.headers.authorization?.split(' ') ?? [];
+    if (type === 'Bearer' && token) return token;
+    return req.cookies?.access_token;
+  }
+
   async canActivate(ctx: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       ctx.getHandler(),
@@ -28,7 +35,7 @@ export class JwtAuthGuard implements CanActivate {
     if (isPublic) return true;
 
     const req = ctx.switchToHttp().getRequest<RequestWithAuth>();
-    const token = req.cookies?.access_token;
+    const token = this.extractToken(req);
     if (!token) throw new AuthRequiredException();
     try {
       const payload = await this.jwt.verifyAsync<{

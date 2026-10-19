@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../src/generated/prisma/client';
+import { Prisma, PrismaClient } from '../src/generated/prisma/client';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -52,55 +52,60 @@ async function main() {
   // Reset seeded chats so reruns do not duplicate
   await prisma.message.deleteMany({ where: { projectId: { in: [P1, P2] } } });
 
+  const seedMessages: Prisma.MessageCreateManyInput[] = [
+    {
+      projectId: P1,
+      role: 'USER',
+      type: 'CHAT',
+      content: 'What leather finish fits a warm, matte premium cabin?',
+    },
+    {
+      projectId: P1,
+      role: 'ASSISTANT',
+      type: 'CHAT',
+      content:
+        'Go for full-grain aniline or semi-aniline leather with a matte topcoat. Pair with a cognac or terracotta base, and brushed bronze trim so metal does not glare.',
+    },
+    {
+      projectId: P1,
+      role: 'USER',
+      type: 'CHAT',
+      content: 'Any sustainable alternative to leather?',
+    },
+    {
+      projectId: P1,
+      role: 'ASSISTANT',
+      type: 'CHAT',
+      content:
+        'Chrome-free tanned leather or high-quality bio-based textiles with a suede-like hand. Check abrasion rating and UV stability for seat bolsters.',
+    },
+    {
+      projectId: P1,
+      role: 'ASSISTANT',
+      type: 'SUMMARY',
+      content:
+        '**Decisions**\n- Matte semi-aniline leather, cognac/terracotta base\n- Brushed bronze trim\n\n**Open questions**\n- Sustainable leather alternative for seat bolsters\n- Abrasion and UV targets',
+    },
+    {
+      projectId: P2,
+      role: 'USER',
+      type: 'CHAT',
+      content: 'Suggest a matte three-colour palette for a compact EV.',
+    },
+    {
+      projectId: P2,
+      role: 'ASSISTANT',
+      type: 'CHAT',
+      content:
+        'Try a sage green, a warm stone grey and a deep ink blue. All three hold up well in matte and photograph well in low light.',
+    },
+  ];
+  const base = Date.now() - 60 * 60 * 1000;
   await prisma.message.createMany({
-    data: [
-      {
-        projectId: P1,
-        role: 'USER',
-        type: 'CHAT',
-        content: 'What leather finish fits a warm, matte premium cabin?',
-      },
-      {
-        projectId: P1,
-        role: 'ASSISTANT',
-        type: 'CHAT',
-        content:
-          'Go for full-grain aniline or semi-aniline leather with a matte topcoat. Pair with a cognac or terracotta base, and brushed bronze trim so metal does not glare.',
-      },
-      {
-        projectId: P1,
-        role: 'USER',
-        type: 'CHAT',
-        content: 'Any sustainable alternative to leather?',
-      },
-      {
-        projectId: P1,
-        role: 'ASSISTANT',
-        type: 'CHAT',
-        content:
-          'Chrome-free tanned leather or high-quality bio-based textiles with a suede-like hand. Check abrasion rating and UV stability for seat bolsters.',
-      },
-      {
-        projectId: P1,
-        role: 'ASSISTANT',
-        type: 'SUMMARY',
-        content:
-          '**Decisions**\n- Matte semi-aniline leather, cognac/terracotta base\n- Brushed bronze trim\n\n**Open questions**\n- Sustainable leather alternative for seat bolsters\n- Abrasion and UV targets',
-      },
-      {
-        projectId: P2,
-        role: 'USER',
-        type: 'CHAT',
-        content: 'Suggest a matte three-colour palette for a compact EV.',
-      },
-      {
-        projectId: P2,
-        role: 'ASSISTANT',
-        type: 'CHAT',
-        content:
-          'Try a sage green, a warm stone grey and a deep ink blue. All three hold up well in matte and photograph well in low light.',
-      },
-    ],
+    data: seedMessages.map((m, i) => ({
+      ...m,
+      createdAt: new Date(base + i * 1000),
+    })),
   });
 
   console.log(`Seeded user ${email} with ${projects.length} projects`);

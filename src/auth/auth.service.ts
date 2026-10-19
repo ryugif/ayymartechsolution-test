@@ -12,6 +12,13 @@ export class AuthService {
   ) {}
   private readonly logger = new Logger(AuthService.name);
 
+  /**
+   * Authenticate a user with email and password, returning a JWT token if successful.
+   * @param email - The user's email address.
+   * @param password - The user's password.
+   * @throws InvalidCredentialsException if the email or password is incorrect.
+   * @returns An object containing the JWT token and user information.
+   */
   async login(email: string, password: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
     const ok = user && (await bcrypt.compare(password, user.passwordHash));

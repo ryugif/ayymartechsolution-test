@@ -3,6 +3,8 @@ import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import jsdoc from 'eslint-plugin-jsdoc';
+import tsdoc from 'eslint-plugin-tsdoc';
 
 export default tseslint.config(
   {
@@ -53,6 +55,33 @@ export default tseslint.config(
           message: 'Use exceptions from exceptions.',
         }],
       }],
+    },
+  },
+  {
+    files: ['src/**/*.ts'],
+    ignores: ['**/*.spec.ts', 'src/generated/**'],
+    plugins: { jsdoc, tsdoc },
+    rules: {
+      'tsdoc/syntax': 'warn',
+      'jsdoc/require-jsdoc': ['warn', {
+        require: { FunctionDeclaration: false },
+        contexts: [
+          "MethodDefinition:not([accessibility='private']):not([accessibility='protected']):not([kind='constructor'])",
+        ],
+      }],
+    },
+  },
+  {
+    files: ['**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      'jsdoc/require-jsdoc': 'off',
     },
   },
 );
