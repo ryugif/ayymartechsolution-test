@@ -92,10 +92,5 @@
     "@prisma/engines",
     "prisma",
     "esbuild"
-  ],
-  "pnpm": {
-    "overrides": {
-      "fastify": "5.11.3"
-    }
-  }
+  ]
 }
