@@ -8,6 +8,7 @@ import {
 import { AppModule } from './app.module.js';
 import { validationExceptionFactory } from './exceptions/validation.factory.js';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import fastifyCors from '@fastify/cors';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -15,6 +16,14 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
   await app.register(fastifyCookie);
+
+  await app.register(fastifyCors, {
+    origin: ['http://localhost:8080', 'http://localhost:5173'],
+    credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()

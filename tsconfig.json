@@ -28,5 +28,5 @@
     "prisma.config.ts",
     "src/guards"
   ],
-  "types": ["node"]
+  "types": ["node", "jest"]
 }
