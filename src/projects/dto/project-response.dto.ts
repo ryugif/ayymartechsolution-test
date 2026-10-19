@@ -21,4 +21,8 @@ export class ProjectResponseDto {
   /** Last change time, also bumped when a chat message is added. */
   @ApiProperty({ description: 'Last change time' })
   updatedAt!: Date;
+
+  /** When the project was archived, or null if it is active. */
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
+  archivedAt!: Date | null;
 }

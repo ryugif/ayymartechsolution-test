@@ -44,6 +44,22 @@ export class ProjectsController {
     return this.projects.create(user.id, dto);
   }
 
+  /** Archive a project. It leaves the list but keeps its data. */
+  @Post(':id/archive')
+  @ResponseMessage('Project archived')
+  @ApiEnvelope(ProjectResponseDto)
+  archive(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.projects.archive(user.id, id);
+  }
+
+  /** Restore an archived project to the list. */
+  @Post(':id/unarchive')
+  @ResponseMessage('Project restored')
+  @ApiEnvelope(ProjectResponseDto)
+  unarchive(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.projects.unarchive(user.id, id);
+  }
+
   /**
    * Get a project by id, only if owned by the current user.
    * @param user - The current authenticated user, injected by the CurrentUser decorator.

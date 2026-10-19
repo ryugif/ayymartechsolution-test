@@ -16,7 +16,7 @@ export class ProjectsService {
    */
   list(userId: string) {
     return this.prisma.project.findMany({
-      where: { userId },
+      where: { userId, archivedAt: null },
       orderBy: { updatedAt: 'desc' },
     });
   }
@@ -87,5 +87,39 @@ export class ProjectsService {
     await this.getOwned(userId, id);
     await this.prisma.project.delete({ where: { id } });
     this.logger.log(`Project ${id} deleted by user ${userId}`);
+  }
+
+  /**
+   * Archive a project: hidden from the list, data kept.
+   *
+   * @param userId - Id of the logged in user.
+   * @param id - Project to archive.
+   * @returns The updated project.
+   * @throws {@link ProjectNotFoundException} When it does not exist or belongs to someone else.
+   */
+  async archive(userId: string, id: string) {
+    await this.getOwned(userId, id);
+    const project = await this.prisma.project.update({
+      where: { id },
+      data: { archivedAt: new Date() },
+    });
+    this.logger.log(`Project ${id} archived by user ${userId}`);
+    return project;
+  }
+
+  /**
+   * Bring an archived project back into the list.
+   *
+   * @param userId - Id of the logged in user.
+   * @param id - Project to restore.
+   * @returns The updated project.
+   * @throws {@link ProjectNotFoundException} When it does not exist or belongs to someone else.
+   */
+  async unarchive(userId: string, id: string) {
+    await this.getOwned(userId, id);
+    return this.prisma.project.update({
+      where: { id },
+      data: { archivedAt: null },
+    });
   }
 }
