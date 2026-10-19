@@ -13,3 +13,6 @@ allowBuilds:
   prisma: true
   protobufjs: true
   unrs-resolver: true
+
+ignoredBuiltDependencies:
+  - '@scarf/scarf'
